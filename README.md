@@ -1,8 +1,8 @@
 # Hand a storefront team a product CSV download
 
-When a merchandiser asks for the current catalog, the checkout service can build a small CSV, place it in storage, and return a link that expires after the handoff. This example uses Infrai presigned URLs: the application writes the CSV to the signed upload address, then gives the caller a signed download address for the same object.
+When a merchandiser needs the current catalog, the checkout service can generate a small CSV, store it, and hand back a link that expires after the transfer. This example uses Infrai presigned URLs: the app writes the CSV to a signed upload address, then returns a signed download address for the same object.
 
-The script is plain REST from any language with no SDK to install. A single `INFRAI_API_KEY` is enough for this storage step alongside the other capabilities a storefront may add later.
+The script is plain REST from any language, with no SDK to install. A single `INFRAI_API_KEY` is enough for this storage step, along with the other capabilities a storefront may add later.
 
 ## Start with a real export
 
@@ -14,15 +14,15 @@ python3 -m unittest -v
 python3 storefront_export.py order-1048
 ```
 
-Open the printed URL before its fifteen-minute download window closes. The object key is `exports/<order id>/products.csv`, so retrying the same order replaces that order's export rather than creating another catalog artifact.
+Open the printed URL before its fifteen-minute download window closes. The object key is `exports/<order id>/products.csv`, so retrying the same order replaces that order's export instead of creating another catalog artifact.
 
 ## Put this in the export route
 
 `main()` contains the route-sized workflow: shape the product rows, create the bucket, request a PUT signature, upload the CSV bytes, then request a GET signature. In an application, replace the two sample `Product` values with the rows from the catalog query and return the printed URL in the response your storefront already uses.
 
-The bucket creation belongs in the workflow because each account starts by choosing its storage bucket. The API helper reads every `{ok, data, error, metadata}` envelope and raises the provided error when a request is not accepted. For a busy export button, it also observes `Retry-After` and spaces 429 retries with exponential delay.
+The bucket creation belongs in the workflow because each account starts by choosing its storage bucket. The API helper reads every `{ok, data, error, metadata}` envelope and raises the provided error when a request is not accepted. For a busy export button, it also watches `Retry-After` and spaces 429 retries with exponential delay.
 
-The download link exposes only this one CSV for its short window. Keep the API key on the server; a browser or checkout page only receives the signed URL.
+The download link exposes only this one CSV for its short window. Keep the API key on the server. A browser or checkout page only gets the signed URL.
 
 ## Small implementation detail
 
